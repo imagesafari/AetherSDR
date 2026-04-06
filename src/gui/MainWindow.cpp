@@ -4194,9 +4194,8 @@ void MainWindow::onSliceAdded(SliceModel* s)
     if (s->isTxSlice())
         m_radioModel.sendCommand(QString("slice set %1 tx=1").arg(s->sliceId()));
 
-#if defined(Q_OS_MAC) || defined(HAVE_PIPEWIRE)
-    // Update m_daxTxMode when TX slice or its mode changes.
-    // Digital modes (DIGU/DIGL/RTTY) use DAX bridge; voice modes use mic.
+    // Update DAX TX mode when TX slice or its mode changes.
+    // Digital modes (DIGU/DIGL/RTTY) use DAX for TX audio routing.
     auto updateDaxTxMode = [this]() {
         bool isDigital = false;
         int txSliceId = -1;
@@ -4209,10 +4208,13 @@ void MainWindow::onSliceAdded(SliceModel* s)
                 break;
             }
         }
+#if defined(Q_OS_MAC) || defined(HAVE_PIPEWIRE)
         m_audio->setDaxTxMode(isDigital);
+#endif
 
         // Auto-toggle radio-side DAX flag on mode change (#534).
         // Digital modes need dax=1 for TX audio routing through DAX.
+        // On Windows this enables external DAX apps (SmartSDR DAX) to TX.
         m_radioModel.transmitModel().setDax(isDigital);
 
 #ifdef HAVE_RADE
@@ -4226,7 +4228,6 @@ void MainWindow::onSliceAdded(SliceModel* s)
     connect(s, &SliceModel::modeChanged, this, updateDaxTxMode);
     connect(s, &SliceModel::txSliceChanged, this, updateDaxTxMode);
     updateDaxTxMode();  // set initial state from current TX slice mode
-#endif
 
     // Push overlay for this slice to the spectrum widget
     pushSliceOverlay(s);
