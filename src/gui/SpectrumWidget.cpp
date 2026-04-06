@@ -160,6 +160,8 @@ SpectrumWidget::SpectrumWidget(QWidget* parent)
     };
     m_zoomSegBtn  = makeBtn("S");
     m_zoomBandBtn = makeBtn("B");
+    m_zoomInBtn   = makeBtn("+");
+    m_zoomOutBtn  = makeBtn("\u2212");  // minus sign
 
     // SmartSDR pcap: B sends "band_zoom=1", S sends "segment_zoom=1"
     connect(m_zoomBandBtn, &QPushButton::clicked, this, [this]() {
@@ -167,6 +169,12 @@ SpectrumWidget::SpectrumWidget(QWidget* parent)
     });
     connect(m_zoomSegBtn, &QPushButton::clicked, this, [this]() {
         emit segmentZoomRequested();
+    });
+    connect(m_zoomInBtn, &QPushButton::clicked, this, [this]() {
+        emit bandwidthChangeRequested(m_bandwidthMhz / 2.0);
+    });
+    connect(m_zoomOutBtn, &QPushButton::clicked, this, [this]() {
+        emit bandwidthChangeRequested(m_bandwidthMhz * 2.0);
     });
 }
 
@@ -1682,9 +1690,11 @@ void SpectrumWidget::positionZoomButtons()
     constexpr int sz = 22;
     const int botY = height() - pad;
 
-    // S | B at bottom-left
+    // S | B | + | − at bottom-left
     m_zoomSegBtn->move(pad, botY - sz);
     m_zoomBandBtn->move(pad + sz + 2, botY - sz);
+    m_zoomInBtn->move(pad + 2 * (sz + 2), botY - sz);
+    m_zoomOutBtn->move(pad + 3 * (sz + 2), botY - sz);
 }
 
 // ─── Colour map ───────────────────────────────────────────────────────────────

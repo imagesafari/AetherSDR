@@ -519,9 +519,11 @@ private:
     QMap<int, VfoWidget*> m_vfoWidgets;
     VfoWidget* m_vfoWidget{nullptr};  // alias to active slice widget (compat)
 
-    // Bottom-left waterfall zoom buttons: S(egment), B(and)
+    // Bottom-left waterfall zoom buttons: S(egment), B(and), +/- (bandwidth)
     QPushButton* m_zoomSegBtn{nullptr};
     QPushButton* m_zoomBandBtn{nullptr};
+    QPushButton* m_zoomInBtn{nullptr};
+    QPushButton* m_zoomOutBtn{nullptr};
 
 #ifdef AETHER_GPU_SPECTRUM
     bool m_rhiInitialized{false};
