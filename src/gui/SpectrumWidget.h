@@ -328,6 +328,7 @@ private:
     void showSpotClusterPopup(const SpotCluster& cluster, const QPoint& globalPos);
     int  tnfAtPixel(int x) const;
     void drawWaterfall(QPainter& p, const QRect& r);
+    void zoomByFactor(double factor);
     void positionZoomButtons();
     void drawFreqScale(QPainter& p, const QRect& r);
     void drawDbmScale(QPainter& p, const QRect& specRect);

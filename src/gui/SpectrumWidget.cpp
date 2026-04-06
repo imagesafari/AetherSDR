@@ -171,10 +171,10 @@ SpectrumWidget::SpectrumWidget(QWidget* parent)
         emit segmentZoomRequested();
     });
     connect(m_zoomInBtn, &QPushButton::clicked, this, [this]() {
-        emit bandwidthChangeRequested(m_bandwidthMhz / 2.0);
+        zoomByFactor(0.5);
     });
     connect(m_zoomOutBtn, &QPushButton::clicked, this, [this]() {
-        emit bandwidthChangeRequested(m_bandwidthMhz * 2.0);
+        zoomByFactor(2.0);
     });
 }
 
@@ -1682,6 +1682,29 @@ void SpectrumWidget::resizeEvent(QResizeEvent* ev)
 
 
     positionZoomButtons();
+}
+
+void SpectrumWidget::zoomByFactor(double factor)
+{
+    double newBw = std::clamp(m_bandwidthMhz * factor, 0.004, 14.0);
+
+    // Recenter on VFO (filter midpoint for SSB, VFO freq for others)
+    double zoomCenter = m_centerMhz;
+    if (const auto* ao = activeOverlay()) {
+        if (m_mode == "USB" || m_mode == "LSB" || m_mode == "DIGU"
+            || m_mode == "DIGL" || m_mode == "RTTY") {
+            zoomCenter = ao->freqMhz
+                + (ao->filterLowHz + ao->filterHighHz) / 2.0 / 1.0e6;
+        } else {
+            zoomCenter = ao->freqMhz;
+        }
+    }
+
+    m_bandwidthMhz = newBw;
+    m_centerMhz = zoomCenter;
+    markOverlayDirty();
+    emit bandwidthChangeRequested(newBw);
+    emit centerChangeRequested(zoomCenter);
 }
 
 void SpectrumWidget::positionZoomButtons()

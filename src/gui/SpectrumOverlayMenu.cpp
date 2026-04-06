@@ -1508,13 +1508,23 @@ bool SpectrumOverlayMenu::eventFilter(QObject* obj, QEvent* event)
             return true;
         }
     }
-    // Consume mouse/wheel events on sub-panels so they don't reach the spectrum
+    // Consume mouse/wheel events on sub-panels so they don't reach the
+    // spectrum widget underneath. Only consume events targeted at the panel
+    // itself — let child widgets (combo boxes, sliders) handle their own
+    // events normally. On Windows, consuming child mouse events breaks
+    // combo box popup selection.
     if (obj == m_bandPanel || obj == m_antPanel || obj == m_dspPanel
         || obj == m_daxPanel || obj == m_displayPanel) {
-        if (event->type() == QEvent::Wheel
-            || event->type() == QEvent::MouseButtonPress
-            || event->type() == QEvent::MouseButtonRelease) {
+        if (event->type() == QEvent::Wheel) {
             return true;  // consumed
+        }
+        if (event->type() == QEvent::MouseButtonPress
+            || event->type() == QEvent::MouseButtonRelease) {
+            auto* w = static_cast<QWidget*>(obj);
+            auto* me = static_cast<QMouseEvent*>(event);
+            QWidget* child = w->childAt(me->pos().toPoint());
+            if (!child)
+                return true;  // click on panel background — consume
         }
     }
     return QWidget::eventFilter(obj, event);
