@@ -931,9 +931,6 @@ void RadioModel::registerAsGuiClient(const QString& clientId)
                         }
 
         // Request DAX TX audio stream (PC mic → radio, DAX mode)
-        // Only claim dax_tx when we have a local DAX bridge; on Windows the
-        // FlexRadio DAX app needs this stream for TX.
-#if defined(Q_OS_MAC) || defined(HAVE_PIPEWIRE)
                         sendCmd(
                             "stream create type=dax_tx",
                             [this](int code, const QString& body) {
@@ -947,7 +944,6 @@ void RadioModel::registerAsGuiClient(const QString& clientId)
                                                << Qt::hex << code << "body:" << body;
                                 }
                             });
-#endif
 
                         // Request remote audio TX stream (voice mode, VOX monitoring)
                         // This stream carries mic audio to the radio for voice TX and
@@ -2619,7 +2615,6 @@ void RadioModel::createAudioStream()
             });
     }
 
-#if defined(Q_OS_MAC) || defined(HAVE_PIPEWIRE)
     sendCmd(
         "stream create type=dax_tx",
         [this](int code, const QString& body) {
@@ -2629,7 +2624,6 @@ void RadioModel::createAudioStream()
                 emit txAudioStreamReady(id);
             }
         });
-#endif
 }
 
 QJsonObject RadioModel::troubleshootingSnapshot() const
